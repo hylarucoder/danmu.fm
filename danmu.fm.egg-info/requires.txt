@@ -1,0 +1,5 @@
+termcolor
+requests
+pycookiecheat
+pyobjc-core
+pyobjc
