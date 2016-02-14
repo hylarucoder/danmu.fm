@@ -1,6 +1,6 @@
 import json
 import re
-from client.douyu_danmu_client import DouyuDanmuClient
+from danmufm.client.douyu_danmu_client import DouyuDanmuClient
 from urllib.request import urlopen
 from urllib.parse import unquote
 class DouyuClient:

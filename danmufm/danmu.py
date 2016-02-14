@@ -10,7 +10,7 @@
 import logging
 import sys
 import os
-from client.douyu_client import DouyuClient
+from danmufm.client.douyu_client import DouyuClient
 
 # root logger config
 logging.basicConfig(

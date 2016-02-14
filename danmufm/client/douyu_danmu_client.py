@@ -5,8 +5,8 @@ import hashlib
 import socket
 import threading
 import time
-from misc.color_printer import ColorPrinter
-from model.douyu_msg import DouyuMsg
+from danmufm.misc.color_printer import ColorPrinter
+from danmufm.model.douyu_msg import DouyuMsg
 # import sys
 import logging
 

@@ -1,11 +1,10 @@
 #-*- encoding: UTF-8 -*-
 from setuptools import setup, find_packages
-import sys, os
 """
 打包的用的setup必须引入，
 """
 
-VERSION = '0.0.1'
+VERSION = '0.0.4'
 
 setup(name='danmu.fm',
       version=VERSION,
@@ -21,13 +20,16 @@ setup(name='danmu.fm',
       include_package_data=True,
       zip_safe=True,
       install_requires=[
-        'termcolor',
         'requests',
-        'pycookiecheat'
-      ] + (['pyobjc-core', 'pyobjc'] if 'darwin' in sys.platform else []),
+      ],
       entry_points={
         'console_scripts':[
             'danmu.fm = danmufm.danmu:main'
         ]
       },
 )
+
+      # install_requires=[
+        # 'requests',
+        # 'pycookiecheat'
+      # ] + (['pyobjc-core', 'pyobjc'] if 'darwin' in sys.platform else []),
