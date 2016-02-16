@@ -3,6 +3,8 @@ import re
 import uuid
 import hashlib
 import socket
+import requests
+import json
 import threading
 import time
 from danmufm.misc.color_printer import ColorPrinter
@@ -31,11 +33,31 @@ class DouyuDanmuClient(object):
             print("主播离线中,正在退出...")
         else:
             print("主播在线中,准备获取弹幕...")
+            self.print_room_info()
             t = threading.Thread(target=self.keeplive)
             t.setDaemon(True)
             t.start()
             while True:
                 self.get_danmu()
+
+    def print_room_info(self):
+        api_url_prefix = "http://douyutv.com/api/v1/"
+        cctime = int(time.time())
+        md5url = "room/" + str(self.room_id) + "?aid=android&client_sys=android&time=" + str(cctime)
+        m2 = hashlib.md5(bytes(md5url + "1231","utf-8"))
+        self.url_json = api_url_prefix + md5url + "&auth=" + m2.hexdigest()
+        res = requests.get(self.url_json)
+        js_data = json.loads(res.text)
+
+        sd_rmtp_url = str(js_data["data"]["rtmp_url"]) + "/" + str(js_data["data"]["rtmp_live"])
+        hd_rmtp_url = str(js_data["data"]["rtmp_url"]) + "/" +str(js_data["data"]["rtmp_live"])
+        spd_rmtp_url = str(js_data["data"]["rtmp_url"]) + "/" +str(js_data["data"]["rtmp_live"])
+        sd_flv_addr = requests.get(sd_rmtp_url,allow_redirects=False).headers["Location"]
+        hd_flv_addr = requests.get(hd_rmtp_url,allow_redirects=False).headers["Location"]
+        spd_flv_addr = requests.get(spd_rmtp_url,allow_redirects=False).headers["Location"]
+        print("普清:" +sd_flv_addr)
+        print("高清:" +hd_flv_addr)
+        print("超清:" +spd_flv_addr)
 
     def keeplive(self):
         print("启动 KeepLive 线程")
