@@ -10,13 +10,11 @@ danmu.fm.egg-info/zip-safe
 danmufm/__init__.py
 danmufm/danmu.py
 danmufm/client/__init__.py
-danmufm/client/client.py
 danmufm/client/douyu_client.py
 danmufm/client/douyu_danmu_client.py
-danmufm/client/tudou_client.py
-danmufm/client/ximalaya_client.py
-danmufm/client/youku_client.py
 danmufm/misc/__init__.py
 danmufm/misc/color_printer.py
+danmufm/misc/downloaders.py
+danmufm/misc/player.py
 danmufm/model/__init__.py
 danmufm/model/douyu_msg.py

@@ -7,8 +7,9 @@ import requests
 import json
 import threading
 import time
-from danmufm.misc.color_printer import ColorPrinter
-from danmufm.model.douyu_msg import DouyuMsg
+from ..misc.player import MPlayer
+from ..misc.color_printer import ColorPrinter
+from ..model.douyu_msg import DouyuMsg
 # import sys
 import logging
 
@@ -17,22 +18,24 @@ class DouyuDanmuClient(object):
 
     """Docstring for DouyuDanmuClient. """
 
-    def __init__(self,room,auth_dst_ip,auth_dst_port):
+    def __init__(self,room,auth_dst_ip,auth_dst_port,g_config):
         self.DANMU_ADDR = ("danmu.douyutv.com",8602)
+        self.g_config = g_config
         self.DANMU_AUTH_ADDR = (auth_dst_ip,int(auth_dst_port))
         self.room = room
         self.room_id = str(room["id"])
         self.auth_dst_ip = auth_dst_ip
         self.auth_dst_port = auth_dst_port
         self.dev_id = str(uuid.uuid4()).replace("-","")
+        self.mplayer = MPlayer()
 
 
     def start(self):
         self.do_login()
         if self.live_stat == "离线":
-            print("主播离线中,正在退出...")
+            logger.info("主播离线中,正在退出...")
         else:
-            print("主播在线中,准备获取弹幕...")
+            logger.info("主播在线中,准备获取弹幕...")
             self.print_room_info()
             t = threading.Thread(target=self.keeplive)
             t.setDaemon(True)
@@ -55,9 +58,28 @@ class DouyuDanmuClient(object):
         sd_flv_addr = requests.get(sd_rmtp_url,allow_redirects=False).headers["Location"]
         hd_flv_addr = requests.get(hd_rmtp_url,allow_redirects=False).headers["Location"]
         spd_flv_addr = requests.get(spd_rmtp_url,allow_redirects=False).headers["Location"]
-        print("普清:" +sd_flv_addr)
-        print("高清:" +hd_flv_addr)
-        print("超清:" +spd_flv_addr)
+        if self.g_config["quality"] <= 0 or self.g_config["quality"] >= 4:
+            logger.info("不播放视频")
+        elif self.g_config["quality"] == 1:
+            logger.info("正在尝试使用Mplayer播放普清视频" + sd_flv_addr)
+            self.mplayer.start(sd_flv_addr)
+        elif self.g_config["quality"] == 2:
+            logger.info("正在尝试使用Mplayer播放高清视频" + hd_flv_addr)
+            self.mplayer.start(hd_flv_addr)
+        else:
+            logger.info("正在尝试使用Mplayer播放超清视频" + spd_flv_addr)
+            self.mplayer.start(spd_flv_addr)
+        print( "=========================================")
+        print( "= Room Infomation                       =")
+        print( "=========================================")
+        print( "= 房间: "+self.room["name"]+"("+self.room_id +")")
+        print( "= 主播: "+self.room["owner_name"]+str(self.room["owner_uid"]))
+        print( "= 公告: "+re.sub("\n+","\n",re.sub('<[^<]+?>', '', self.room["gg_show"])))
+        print( "= 标签: "+str(self.room["tags"]))
+        print( "= 在线: "+self.live_stat)
+        print( "= 粉丝: "+self.fans_count)
+        print( "= 财产: "+self.weight)
+        print( "=========================================")
 
     def keeplive(self):
         print("启动 KeepLive 线程")
@@ -113,34 +135,38 @@ class DouyuDanmuClient(object):
         else:
             msg_content = recv_msg.replace("@S","/").replace("@A=",":").replace("@=",":")
             # print(msg_content)
-            msg_type = re.search('type:(.+?)\/', msg_content).group(1)
-            if msg_type == "chatmessage":
-                msg_type_zh = "弹幕消息"
-                sender_id = re.search('\/sender:(.+?)\/', msg_content).group(1)
-                nickname = re.search('\/snick:(.+?)\/', msg_content).group(1)
-                content = re.search('\/content:(.+?)\/', msg_content).group(1)
-                strength = re.search('\/strength:(.+?)\/', msg_content).group(1)
-                level = re.search('\/level:(.+?)\/', msg_content).group(1)
-                time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                ColorPrinter.green("|" + msg_type_zh + "| " + self.align_left_str(nickname,20," ") + self.align_left_str("<Lv:" + level + ">",8," ") + self.align_left_str("("+ sender_id +")",13," ") + self.align_left_str("["+strength+"]",10," ") + "@ "+time+": " + content +" ")
+            try:
+                msg_type = re.search('type:(.+?)\/', msg_content).group(1)
+                if msg_type == "chatmessage":
+                    msg_type_zh = "弹幕消息"
+                    sender_id = re.search('\/sender:(.+?)\/', msg_content).group(1)
+                    nickname = re.search('\/snick:(.+?)\/', msg_content).group(1)
+                    content = re.search('\/content:(.+?)\/', msg_content).group(1)
+                    strength = re.search('\/strength:(.+?)\/', msg_content).group(1)
+                    level = re.search('\/level:(.+?)\/', msg_content).group(1)
+                    time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    ColorPrinter.green("|" + msg_type_zh + "| " + self.align_left_str(nickname,20," ") + self.align_left_str("<Lv:" + level + ">",8," ") + self.align_left_str("("+ sender_id +")",13," ") + self.align_left_str("["+strength+"]",10," ") + "@ "+time+": " + content +" ")
 
-            elif msg_type == "userenter":
-                msg_type_zh = "入房消息"
-                user_id = re.search('\/userinfo:id:(.+?)\/', msg_content).group(1)
-                nickname = re.search('\/nick:(.+?)\/',msg_content).group(1)
-                strength = re.search('\/strength:(.+?)\/',msg_content).group(1)
-                time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                level = re.search('\/level:(.+?)\/', msg_content).group(1)
-                ColorPrinter.red("|" + msg_type_zh + "| " + self.align_left_str(nickname,20," ") + self.align_left_str("<Lv:" + level + ">",8," ") + self.align_left_str("("+ user_id +")",13," ") + self.align_left_str("["+strength+"]",10," ") + "@ "+time)
+                elif msg_type == "userenter":
+                    msg_type_zh = "入房消息"
+                    user_id = re.search('\/userinfo:id:(.+?)\/', msg_content).group(1)
+                    nickname = re.search('\/nick:(.+?)\/',msg_content).group(1)
+                    strength = re.search('\/strength:(.+?)\/',msg_content).group(1)
+                    time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    level = re.search('\/level:(.+?)\/', msg_content).group(1)
+                    ColorPrinter.red("|" + msg_type_zh + "| " + self.align_left_str(nickname,20," ") + self.align_left_str("<Lv:" + level + ">",8," ") + self.align_left_str("("+ user_id +")",13," ") + self.align_left_str("["+strength+"]",10," ") + "@ "+time)
 
-            elif msg_type == "dgn":
-                msg_type_zh = "鱼丸赠送"
-                level = re.search('\/level:(\d+?)\/', msg_content).group(1)
-                user_id = re.search('\/sid:(.+?)\/', msg_content).group(1)
-                nickname = re.search('\/src_ncnm:(.+?)\/', msg_content).group(1)
-                hits = re.search('\/hits:(.+?)\/', msg_content).group(1)
-                time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                ColorPrinter.yellow("|" + msg_type_zh + "| " + self.align_left_str(nickname,20," ") + self.align_left_str("<Lv:" + level + ">",8," ") + self.align_left_str("("+ user_id +")",13," ") + self.align_left_str("[unknown]",10," ") + "@ "+time+": " + hits + " hits ")
+                elif msg_type == "dgn":
+                    msg_type_zh = "鱼丸赠送"
+                    level = re.search('\/level:(\d+?)\/', msg_content).group(1)
+                    user_id = re.search('\/sid:(.+?)\/', msg_content).group(1)
+                    nickname = re.search('\/src_ncnm:(.+?)\/', msg_content).group(1)
+                    hits = re.search('\/hits:(.+?)\/', msg_content).group(1)
+                    time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    ColorPrinter.yellow("|" + msg_type_zh + "| " + self.align_left_str(nickname,20," ") + self.align_left_str("<Lv:" + level + ">",8," ") + self.align_left_str("("+ user_id +")",13," ") + self.align_left_str("[unknown]",10," ") + "@ "+time+": " + hits + " hits ")
+            except Exception as e:
+                print(e)
+                print("解析错误")
 
 
 

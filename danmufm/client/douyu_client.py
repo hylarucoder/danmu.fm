@@ -1,13 +1,13 @@
 import json
 import re
-from danmufm.client.douyu_danmu_client import DouyuDanmuClient
+from .douyu_danmu_client import DouyuDanmuClient
 from urllib.request import urlopen
 from urllib.parse import unquote
 class DouyuClient:
 
     """Docstring for DouyuClient. """
 
-    def __init__(self,url):
+    def __init__(self,url,g_config):
         self.DOUYU_PREFIX = "http://www.douyutv.com/"
 
         if self.DOUYU_PREFIX not in url:
@@ -38,7 +38,7 @@ class DouyuClient:
             auth_servers = valid_json(unquote(auth_server_json_format["server_config"]))
             auth_server_ip = auth_servers[0]["ip"]
             auth_server_port = auth_servers[0]["port"]
-            client = DouyuDanmuClient(room,auth_server_ip, auth_server_port)
+            client = DouyuDanmuClient(room,auth_server_ip, auth_server_port,g_config)
             client.start()
         else:
             print("请求网页错误,正在退出...")
