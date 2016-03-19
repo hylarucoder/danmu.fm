@@ -3,3 +3,5 @@
 from danmufm.danmu import main
 
 main()
+print("finish")
+

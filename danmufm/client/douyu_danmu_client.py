@@ -114,7 +114,7 @@ class DouyuDanmuClient(object):
             self.send_qrl_msg()
             recv_msg = self.auth_recv()
             # print(recv_msg)
-            recv_msg = self.auth_recv()
+            # recv_msg = self.auth_recv()
             # print(recv_msg)
             self.send_auth_keeplive_msg()
             recv_msg = self.auth_recv()
