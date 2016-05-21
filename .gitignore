@@ -1,4 +1,6 @@
-.DS_Store
+*.swp
+*.pyc
+run.py
 /build/
 /danmu.fm.egg-info/
 /dist/
