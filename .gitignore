@@ -1,4 +1,5 @@
-.DS_Store
+*.swp
+*.pyc
 /build/
 /danmu.fm.egg-info/
 /dist/
