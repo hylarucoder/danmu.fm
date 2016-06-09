@@ -3,15 +3,27 @@ import re
 from .douyu_danmu_client import DouyuDanmuClient
 from urllib.request import urlopen
 from urllib.parse import unquote
+
+def valid_json(my_json):
+    """ 验证是否为 json 数据格式"""
+    try:
+        json_object = json.loads(my_json)
+    except ValueError as e:
+        print(e)
+        return False
+    return json_object
+
 class DouyuClient:
 
     """Docstring for DouyuClient. """
 
-    def __init__(self,url,g_config):
+    def __init__(self,url,config):
         self.DOUYU_PREFIX = "http://www.douyu.com/"
-
         if self.DOUYU_PREFIX not in url:
             url = self.DOUYU_PREFIX + url
+        self.fetch_room_info(url,config)
+
+    def fetch_room_info(self,url,config):
         html = urlopen(url).read().decode()
         room_info_json = re.search('var\s\$ROOM\s=\s({.*});', html).group(1)
         # print(room_info_json)
@@ -40,26 +52,10 @@ class DouyuClient:
             auth_servers = valid_json(unquote(auth_server_json_format["server_config"]))
             auth_server_ip = auth_servers[0]["ip"]
             auth_server_port = auth_servers[0]["port"]
-            client = DouyuDanmuClient(room,auth_server_ip, auth_server_port,g_config)
-            client.start()
+            self.fetch_danmu(room,auth_server_ip,auth_server_port,config)
         else:
             print("请求网页错误,正在退出...")
 
-def valid_json(my_json):
-    try:
-        json_object = json.loads(my_json)
-    except ValueError as e:
-        print(e)
-        return False
-    return json_object
-
-
-
-def main():
-    DouyuClient("http://www.douyutv.com/236274")
-
-
-if __name__ == "__main__":
-    main()
-
-
+    def fetch_danmu(self,room,auth_server_ip,auth_server_port,config):
+            client = DouyuDanmuClient(room,auth_server_ip, auth_server_port,config)
+            client.start()

@@ -4,84 +4,115 @@
 """
 弹幕fm主程序
 """
-import logging
 import argparse
 import gettext
+import psycopg2
 import io
 import json
+import logging
 import os
+import re
 import sys
 import time
-
+from .settings import ROOT_PROJECT_DIR , ENGINE
+from sqlalchemy.orm import sessionmaker, scoped_session
+from .cmd_config import config
 # from threading import Thread
 # import subprocess
 from .client.douyu_client import DouyuClient
+from sqlalchemy.util.queue import Empty
+import sqlalchemy
+import traceback
 
-if sys.version_info < (3,):
-    raise RuntimeError("at least Python3.0 is required!!")
 APP_DESC = """
+    _____                                ______ __  __
+    |  __ \                              |  ____|  \/  |
+    | |  | | __ _ _ __  _ __ ___  _   _  | |__  | \  / |
+    | |  | |/ _` | '_ \| '_ ` _ \| | | | |  __| | |\/| |
+    | |__| | (_| | | | | | | | | | |_| |_| |    | |  | |
+    |_____/ \__,_|_| |_|_| |_| |_|\__,_(_)_|    |_|  |_|
 
- _____                                ______ __  __
-|  __ \                              |  ____|  \/  |
-| |  | | __ _ _ __  _ __ ___  _   _  | |__  | \  / |
-| |  | |/ _` | '_ \| '_ ` _ \| | | | |  __| | |\/| |
-| |__| | (_| | | | | | | | | | |_| |_| |    | |  | |
-|_____/ \__,_|_| |_|_| |_| |_|\__,_(_)_|    |_|  |_|
+                        ---- A Terminal Tools For DouyuTV
 
-                    ---- A Terminal Tools For DouyuTV
-
-@author Micheal Gardner (twocucao@gmail.com)
-                                last_update 2016-02-16
+    @author Micheal Gardner (twocucao@gmail.com)
+                                    last_update 2016-06-09
 """
-
-
-logging.basicConfig(
-    format="%(asctime)s - \
-[%(process)d]%(filename)s:%(lineno)d - %(levelname)s: %(message)s",
-    datefmt='%Y-%m-%d %H:%I:%S',
-    # filename=os.path.expanduser('~/.danmu.fm.log'),
-    level=logging.INFO
-)
 
 logger = logging.getLogger('danmu.fm')
 
+
+def check_setting_and_env():
+    logger.info("程序正在启动,检查环境配置")
+    if sys.version_info < (3,2):
+        raise RuntimeError("at least Python 3.3 is required!!")
+    Session = scoped_session(sessionmaker(bind=ENGINE))
+    s = Session()
+    try:
+        rs_version = s.execute("SELECT VERSION();")
+        version = rs_version.fetchone()[0]
+        env_infomation = """\
+        ------------------------------------------------------------
+        PostgreSQL 版本信息 : {0}
+        ------------------------------------------------------------
+        """.format(version)
+        print(env_infomation)
+        Session.remove()
+    except sqlalchemy.exc.OperationalError as e:
+        logger.error("没有初始化数据库")
+        # 貌似没什么作用?
+        try:
+            conn = ENGINE.connect()
+            conn.execute("commit")
+            conn.execute("create database danmufm")
+            conn.close()
+        except sqlalchemy.exc.OperationalError as e:
+            logger.error("无法创建数据库,请检查配置")
+            logger.info("程序退出")
+            exit()
+        pass
+
+    logger.info("开始配置环境")
+
+import click
+
+@click.command()
+@click.argument('url', required=True)
+@click.option('-q','--quality', default=0, help='查看视频清晰度, 0: 无, 1:流畅, 2:普通, 3:高清,')
+@click.option('-m','--mode', default=0 , help='选择弹幕类型,0为默认普通弹幕,1为海量弹幕')
+@click.option('-p','--path', default=".",type=click.Path(), help='视频缓存本地地址,注:quality必须要为1-2-3其中之一')
+@click.option('-v','--verbose', count=True, help='-v 为普通日志模式, -vvvv 超级海量日志模式')
+def parse_command(quality, mode , path , verbose , url):
+    """
+指定获取主播的房间地址对主播直播情况进行抓取与统计 (Mac and Ubuntu Only)
+
+Example:
+
+    danmu.fm -q 2 -v 1 http://www.douyu.com/qiuri
+
+    danmu.fm -q 3 -m 0 -p "videos/20160609_1900_2240_小苍.mp4" -v 1 http://www.douyu.com/qiuri
+
+    """
+
+    # danmu.fm -q 3 -m 0 -p "videos/20160609_1900_2240_小苍.mp4"-v 1 http://www.douyu.com/qiuri
+    config["video_quality"] = quality if quality <= -1  or quality >= 3 else 0
+    config["danmu_mode"] = mode if mode <= -1 or mode >= 2 else 0
+    config["video_stored_path"] = path
+    config["verbose"] = verbose
+    config["zhubo_room_url"] = url
+    logging.info("正在检查环境")
+    check_setting_and_env()
+    logging.info("环境检查完毕,正在开启斗鱼客户端")
+    start_douyu_client()
+
+def start_douyu_client():
+    print("---------")
+    url     = config["zhubo_room_url"]
+    DouyuClient(url,config)
+
 def main():
-
     print(APP_DESC)
-    if len(sys.argv) == 1:
-        sys.argv.append('--help')
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-q','--quality',type=int,help="download video quality : 1 for the standard-definition; 3 for the super-definition")
-    parser.add_argument('-v','--verbose', help="print more debuging information")
-    parser.add_argument('-s','--store', help="保存流媒体文件到指定位置")
-    parser.add_argument('-d','--danmu', help="读取~/.danmu.fm配置,请~/.danmu.fm指定数据库")
-    parser.add_argument('url',metavar='URL',nargs='+', help="zhubo page URL (http://www.douyutv.com/*/)")
-    args = parser.parse_args()
+    parse_command()
 
-    #初始化日志
-    # logger.setLevel(logging.DEBUG if args.verbose else logging.INFO)
-    logger.setLevel(logging.INFO)
-    #视频质量控制
-    #0为不下载视频
-    #1为普清
-    #2为高清
-    #3为超清
-    qualities = ["","普清","高清","超清"]
-    quality = args.quality if args.quality is not None else 0
-    if quality < 1 or quality > 3:
-        logger.info("解析所有视频流地址")
-    else:
-        logger.info("解析"+qualities[quality]+"视频地址,并尝试使用Mplayer播放")
-    store = args.store if args.store is None else False
-    #url
-    url = (args.url)[0]
-    g_config = {}
-    g_config["quality"] = quality
-    g_config["store"] = store
-
-    # 如果是斗鱼
-    logging.info("初始斗鱼弹幕助手")
-    DouyuClient(url,g_config)
 
 
 if __name__ == "__main__":

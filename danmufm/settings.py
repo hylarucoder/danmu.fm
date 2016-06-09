@@ -60,6 +60,8 @@ DEBUG = config["DEBUG"] # Whether or not to show DEBUG level messages
 ## 开启日志颜色
 USE_COLORS = config["USE_COLORS"] # Whether or not colors should be used when outputting text
 
+# danmu.client
+# danmu.fm 文件即可
 LOGGING = {  # dictConfig for output stream and file logging
     'version': 1,
     'disable_existing_loggers': False,
@@ -100,7 +102,12 @@ LOGGING = {  # dictConfig for output stream and file logging
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True,
         },
-        'danmucrawler': {
+        'danmu.client': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True,
+        },
+        'danmu.fm': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': True,
@@ -122,3 +129,9 @@ SESSION_FACTORY = sessionmaker(bind=ENGINE,echo=DEBUG)
 
 # 检查配置使用,真实环境中应该取消
 # print(locals())
+
+
+
+
+
+# [TODO: 添加设置报告]

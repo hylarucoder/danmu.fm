@@ -1,6 +1,6 @@
 class DouyuMsg(object):
 
-    """Docstring for DouyuTcpMessage. """
+    """Docstring for DouyuMsg. """
 
     def __init__(self,content):
         self.length = bytearray([len(content) + 9, 0x00, 0x00, 0x00])

@@ -12,8 +12,7 @@ from ..misc.color_printer import ColorPrinter
 from ..model.douyu_msg import DouyuMsg
 # import sys
 import logging
-
-logger = logging.getLogger("danmufm")
+logger = logging.getLogger("danmu.fm")
 class DouyuDanmuClient(object):
 
     """Docstring for DouyuDanmuClient. """
@@ -58,12 +57,12 @@ class DouyuDanmuClient(object):
         sd_flv_addr = requests.get(sd_rmtp_url,allow_redirects=False).headers["Location"]
         hd_flv_addr = requests.get(hd_rmtp_url,allow_redirects=False).headers["Location"]
         spd_flv_addr = requests.get(spd_rmtp_url,allow_redirects=False).headers["Location"]
-        if self.g_config["quality"] <= 0 or self.g_config["quality"] >= 4:
+        if self.g_config["video_quality"] <= 0:
             logger.info("不播放视频")
-        elif self.g_config["quality"] == 1:
+        elif self.g_config["video_quality"] == 1:
             logger.info("正在尝试使用Mplayer播放普清视频" + sd_flv_addr)
             self.mplayer.start(sd_flv_addr)
-        elif self.g_config["quality"] == 2:
+        elif self.g_config["video_quality"] == 2:
             logger.info("正在尝试使用Mplayer播放高清视频" + hd_flv_addr)
             self.mplayer.start(hd_flv_addr)
         else:
