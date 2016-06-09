@@ -8,13 +8,15 @@ class DouyuClient:
     """Docstring for DouyuClient. """
 
     def __init__(self,url,g_config):
-        self.DOUYU_PREFIX = "http://www.douyutv.com/"
+        self.DOUYU_PREFIX = "http://www.douyu.com/"
 
         if self.DOUYU_PREFIX not in url:
             url = self.DOUYU_PREFIX + url
         html = urlopen(url).read().decode()
-        room_info_json = re.search('var\s\$ROOM\s=\s({.*})', html).group(1)
-        auth_server_json = re.search('var\sroom_args\s=\s({.*})', html).group(1)
+        room_info_json = re.search('var\s\$ROOM\s=\s({.*});', html).group(1)
+        # print(room_info_json)
+        auth_server_json = re.search('\$ROOM\.args\s=\s({.*});', html).group(1)
+        # print(auth_server_json)
         room_info_json_format = valid_json(room_info_json)
         auth_server_json_format = valid_json(auth_server_json)
 

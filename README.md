@@ -33,8 +33,12 @@ danmu.fm  -v 1 http://www.douyutv.com/16789
 
 ## 感谢
 
-往事如风
-douban.fm (Python版本)
+ - 往事如风
+ - douban.fm (Python版本)
+
+## 最近更新时间
+
+Update 20160609 : 更新Python客户端,修复由于斗鱼网页版面修改带来的小问题,直接开启海量弹幕模式(请大家不要问我为什么端午节这一天为什么闲着没事更新代码,这个真的和情人节是同一个原因).  GitHub - twocucao/danmu.fm: douyutv danmu 斗鱼TV 弹幕助手
 
 ## License
 

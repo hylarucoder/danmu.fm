@@ -86,12 +86,7 @@ class DouyuDanmuClient(object):
         while True:
             self.send_auth_keeplive_msg()
             self.send_danmu_keeplive_msg()
-            # print("发送 KeepLive")
             time.sleep(40)
-
-
-
-
 
 
     def do_login(self):
@@ -101,14 +96,15 @@ class DouyuDanmuClient(object):
         self.danmu_socket.connect(self.DANMU_ADDR)
         self.send_auth_loginreq_msg()
         recv_msg = self.auth_recv()
-        # print(recv_msg)
+        print(recv_msg)
         if "live_stat@=0" in recv_msg:
             self.live_stat = "离线"
         else:
             self.live_stat = "在线"
             self.username = re.search('\/username@=(.+)\/nickname', recv_msg).group(1)
             recv_msg = self.auth_recv()
-            self.gid = re.search('\/gid@=(\d+)\/', recv_msg).group(1)
+            # self.gid = re.search('\/gid@=(\d+)\/', recv_msg).group(1) # 取消注释可以直接使用正常方式
+            self.gid = '-9999' # 据说 9999 可以直接获取海量字幕,以后有机会增加命令行配置
             self.weight = re.search('\/weight@=(\d+)\/', recv_msg).group(1)
             self.fans_count = re.search('\/fans_count@=(\d+)\/', recv_msg).group(1)
             self.send_qrl_msg()
@@ -137,33 +133,37 @@ class DouyuDanmuClient(object):
             # print(msg_content)
             try:
                 msg_type = re.search('type:(.+?)\/', msg_content).group(1)
-                if msg_type == "chatmessage":
-                    msg_type_zh = "弹幕消息"
-                    sender_id = re.search('\/sender:(.+?)\/', msg_content).group(1)
-                    nickname = re.search('\/snick:(.+?)\/', msg_content).group(1)
-                    content = re.search('\/content:(.+?)\/', msg_content).group(1)
-                    strength = re.search('\/strength:(.+?)\/', msg_content).group(1)
-                    level = re.search('\/level:(.+?)\/', msg_content).group(1)
-                    time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    ColorPrinter.green("|" + msg_type_zh + "| " + self.align_left_str(nickname,20," ") + self.align_left_str("<Lv:" + level + ">",8," ") + self.align_left_str("("+ sender_id +")",13," ") + self.align_left_str("["+strength+"]",10," ") + "@ "+time+": " + content +" ")
 
-                elif msg_type == "userenter":
-                    msg_type_zh = "入房消息"
-                    user_id = re.search('\/userinfo:id:(.+?)\/', msg_content).group(1)
-                    nickname = re.search('\/nick:(.+?)\/',msg_content).group(1)
-                    strength = re.search('\/strength:(.+?)\/',msg_content).group(1)
+                if msg_type == "chatmsg":
+                    msg_type_zh = "弹幕消息"
+                    sender_id = re.search('\/uid:(.+?)\/', msg_content).group(1) if 'uid:' in msg_content else "unknown"
+                    nickname = re.search('\/nn:(.+?)\/', msg_content).group(1) if 'nn:' in msg_content else "unknown"
+                    content = re.search('\/txt:(.+?)\/', msg_content).group(1) if 'txt:' in msg_content else "unknown"
+                    level = re.search('\/level:(.+?)\/', msg_content).group(1) if 'level:' in msg_content else "unknown"
+                    client_type = re.search('\/ct:(.+?)\/', msg_content).group(1)  if 'ct:' in msg_content else "unknown"# ct 默认值 0 web
                     time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    level = re.search('\/level:(.+?)\/', msg_content).group(1)
+                    ColorPrinter.green("|" + msg_type_zh + "| " + self.align_left_str(nickname,20," ") + self.align_left_str("<Lv:" + level + ">",8," ") + self.align_left_str("("+ sender_id +")",13," ") + self.align_left_str("["+client_type+"]",10," ") + "@ "+time+": " + content +" ")
+
+                elif msg_type == "uenter":
+                    msg_type_zh = "入房消息"
+                    user_id = re.search('\/uid:(.+?)\/', msg_content).group(1) if 'uid:' in msg_content else "unknown"
+                    nickname = re.search('\/nn:(.+?)\/',msg_content).group(1) if 'nn:' in msg_content else "unknown"
+                    strength = re.search('\/str:(.+?)\/',msg_content).group(1) if 'str:' in msg_content else "unknown"
+                    level = re.search('\/level:(.+?)\/', msg_content).group(1) if 'level:' in msg_content else "unknown"
+                    time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     ColorPrinter.red("|" + msg_type_zh + "| " + self.align_left_str(nickname,20," ") + self.align_left_str("<Lv:" + level + ">",8," ") + self.align_left_str("("+ user_id +")",13," ") + self.align_left_str("["+strength+"]",10," ") + "@ "+time)
 
-                elif msg_type == "dgn":
-                    msg_type_zh = "鱼丸赠送"
-                    level = re.search('\/level:(\d+?)\/', msg_content).group(1)
-                    user_id = re.search('\/sid:(.+?)\/', msg_content).group(1)
-                    nickname = re.search('\/src_ncnm:(.+?)\/', msg_content).group(1)
-                    hits = re.search('\/hits:(.+?)\/', msg_content).group(1)
+                elif msg_type == "dgb":
+                    msg_type_zh = "礼物赠送"
+                    level = re.search('\/level:(\d+?)\/', msg_content).group(1) if 'level:' in msg_content else "unknown"
+                    user_id = re.search('\/uid:(.+?)\/', msg_content).group(1) if 'uid:' in msg_content else "unknown"
+                    nickname = re.search('\/nn:(.+?)\/', msg_content).group(1) if 'nn:' in msg_content else "unknown"
+                    strength = re.search('\/str:(.+?)\/', msg_content).group(1) if 'str:' in msg_content else "unknown"
+                    dw = re.search('\/dw:(.+?)\/', msg_content).group(1) if 'dw:' in msg_content else "unknown"
+                    gs = re.search('\/gs:(.+?)\/', msg_content).group(1) if 'gs:' in msg_content else "unknown"
+                    hits = re.search('\/hits:(.+?)\/', msg_content).group(1) if 'hits:' in msg_content else "unknown"
                     time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    ColorPrinter.yellow("|" + msg_type_zh + "| " + self.align_left_str(nickname,20," ") + self.align_left_str("<Lv:" + level + ">",8," ") + self.align_left_str("("+ user_id +")",13," ") + self.align_left_str("[unknown]",10," ") + "@ "+time+": " + hits + " hits ")
+                    ColorPrinter.yellow("|" + msg_type_zh + "| " + self.align_left_str(nickname,20," ") + self.align_left_str("<Lv:" + level + ">",8," ") + self.align_left_str("("+ user_id +")",13," ") + self.align_left_str("[" + dw + "]",10," ") + self.align_left_str("[" + gs + "]",10," ") + self.align_left_str("[" + strength + "]",10," ") + "@ "+time+": " + hits + " hits ")
             except Exception as e:
                 print(e)
                 print("解析错误")
