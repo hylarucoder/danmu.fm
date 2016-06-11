@@ -17,7 +17,7 @@ import shutil
 from sqlalchemy.orm import sessionmaker
 from os.path import expanduser
 
-VERSION               = "0.2.0"
+VERSION               = "0.3.0"
 PROJECT_NAME          = "danmufm"
 MODULE_NAME           = PROJECT_NAME.lower()
 # 项目根目录

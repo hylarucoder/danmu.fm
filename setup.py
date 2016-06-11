@@ -4,11 +4,11 @@ from setuptools import setup, find_packages
 打包的用的setup必须引入，
 """
 
-VERSION = '0.2.0'
+VERSION = '0.3.0'
 
 setup(name='danmu.fm',
       version=VERSION,
-      description="a tiny and smart cli player of douyutv,ximalayad,anmu based on Python",
+      description="a tiny and smart cli player of douyu based on Python",
       long_description='just enjoy',
       classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='python douyu danmu danmu.fm terminal',
