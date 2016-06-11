@@ -97,8 +97,8 @@ Example:
     """
 
     # danmu.fm -q 3 -m 0 -p "videos/20160609_1900_2240_小苍.mp4"-v 1 http://www.douyu.com/qiuri
-    config["video_quality"] = quality if quality <= -1 or quality >= 3 else 0
-    config["danmu_mode"] = mode if mode > -1 or mode < 2 else 0
+    config["video_quality"] = quality if quality > -1 or quality < 4 else 0
+    config["danmu_mode"] = mode if mode > -1 and mode < 2 else 0
     current_working_dir = os.getcwd()
     config["video_stored_path"] = os.path.join(current_working_dir,path) if path != "." else current_working_dir
     config["thread_num"] = thread if thread >= 2 or mode <= 50 else 10
@@ -107,7 +107,7 @@ Example:
     config["zhubo_room_url"] = url
     logger.info("正在检查环境")
     check_setting_and_env()
-    logger.info("环境检查完毕,正在开启斗鱼客户端")
+    logger.info("环境检查完毕,正在开启斗鱼客户端(请等待15s~30s)")
     start_douyu_client()
 
 

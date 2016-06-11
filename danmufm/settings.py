@@ -25,7 +25,7 @@ ROOT_PROJECT_DIR      = os.path.dirname(os.path.dirname(os.path.abspath(__file__
 # 项目次目录
 MODULE_DIR            = os.path.join(ROOT_PROJECT_DIR, MODULE_NAME)
 TEST_DIR              = os.path.join(ROOT_PROJECT_DIR, 'test')
-TEMPLATE_DIR          = os.path.join(ROOT_PROJECT_DIR, 'template')
+TEMPLATE_DIR          = os.path.join(MODULE_DIR, 'template')
 
 CURRENT_USER_HOME_DIR = expanduser("~")
 USER_CONFIG_DIR       = os.path.join(CURRENT_USER_HOME_DIR, '.danmu.fm')
