@@ -9,12 +9,9 @@
 '''
 import logging
 from logging.config import dictConfig
-from sqlalchemy.engine.url import URL
-from sqlalchemy import create_engine
 import sys
 import os
 import shutil
-from sqlalchemy.orm import sessionmaker
 from os.path import expanduser
 
 VERSION               = "0.3.0"
@@ -52,8 +49,6 @@ with open(CONFIG_FILE) as f:
     code = compile(f.read(), CONFIG_FILE, 'exec')
     exec(code, config)
 # 数据库配置
-USE_SQLITE = config["USE_SQLITE"] # Whether or not to show DEBUG level messages
-DATABASE_CONFIG = config["DATABASE_CONFIG"]
 
 # 日志配置
 ## 开启DEBUG以上
@@ -124,9 +119,6 @@ MAIL_USER      = config["MAIL_USER"]
 MAIL_PASSWORD  = config["MAIL_PASSWORD"]
 
 
-ENGINE = create_engine(URL(**DATABASE_CONFIG))
-
-SESSION_FACTORY = sessionmaker(bind=ENGINE,echo=DEBUG)
 
 # 检查配置使用,真实环境中应该取消
 # print(locals())

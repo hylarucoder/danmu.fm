@@ -1,6 +1,6 @@
 # danmu.fm 
 
-这是一个用来获取斗鱼TV指定主播的弹幕的命令行小工具.最近更新时间为 2016-06-11
+这是一个用来获取斗鱼TV指定主播的弹幕的命令行小工具.最近更新时间为 2016-07-14
 
 > **如果对你有帮助记得点赞哦**
 
@@ -48,10 +48,11 @@ danmu.fm -q 3 -m 1 -p 0 -vvvv  http://www.douyu.com/wt55kai
 
 ## 最近更新时间
 
- - **Update 20160611 : ** 更新Python客户端,引入Click进行命令行构建,重写一半的逻辑.版本提升为0.3.0
- - **Update 20160609 : ** 更新Python客户端,修复由于斗鱼网页版面修改带来的小问题,直接开启海量弹幕模式(请大家不要问我为什么端午节这一天为什么闲着没事更新代码,这个真的和情人节是同一个原因).
- - **Update 20160220 : **更新Python客户端,增加直播视频的Live获取,以及Mac平台下面的Mplayer的视频播放.代码均放在Github上面. [GitHub - twocucao/danmu.fm: douyutv danmu 斗鱼TV 弹幕助手**](//link.zhihu.com/?target=https%3A//github.com/twocucao/danmu.fm)
- - **Update 20160214 : **更新Python和Ruby客户端(请大家不要问我为什么情人节这一天为什么闲着没事更新代码)**
+ - **Update 20160714 : ** 更新Python客户端, 微小调整.版本提升为0.3.1
+ - **Update 20160611 : ** 更新Python客户端, 引入Click进行命令行构建,重写一半的逻辑.版本提升为0.3.0
+ - **Update 20160609 : ** 更新Python客户端, 修复由于斗鱼网页版面修改带来的小问题,直接开启海量弹幕模式(请大家不要问我为什么端午节这一天为什么闲着没事更新代码,这个真的和情人节是同一个原因).
+ - **Update 20160220 : ** 更新Python客户端, 增加直播视频的Live获取,以及Mac平台下面的Mplayer的视频播放.代码均放在Github上面. [GitHub - twocucao/danmu.fm: douyutv danmu 斗鱼TV 弹幕助手**](//link.zhihu.com/?target=https%3A//github.com/twocucao/danmu.fm)
+ - **Update 20160214 : ** 更新Python和Ruby客户端(请大家不要问我为什么情人节这一天为什么闲着没事更新代码)**
 
 ## TO_DO_LIST
 

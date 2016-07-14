@@ -13,14 +13,11 @@ import os
 import re
 import sys
 import time
-from .settings import ROOT_PROJECT_DIR, ENGINE
-from sqlalchemy.orm import sessionmaker, scoped_session
+from .settings import ROOT_PROJECT_DIR
 from .cmd_config import config
 # from threading import Thread
 # import subprocess
 from .client.douyu_client import DouyuClient
-from sqlalchemy.util.queue import Empty
-import sqlalchemy
 import traceback
 
 APP_DESC = """
