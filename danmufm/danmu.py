@@ -6,7 +6,6 @@
 """
 import argparse
 import gettext
-import psycopg2
 import io
 import json
 import logging

@@ -52,6 +52,7 @@ with open(CONFIG_FILE) as f:
     code = compile(f.read(), CONFIG_FILE, 'exec')
     exec(code, config)
 # 数据库配置
+USE_SQLITE = config["USE_SQLITE"] # Whether or not to show DEBUG level messages
 DATABASE_CONFIG = config["DATABASE_CONFIG"]
 
 # 日志配置
