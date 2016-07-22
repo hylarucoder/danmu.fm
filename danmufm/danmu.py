@@ -31,7 +31,7 @@ APP_DESC = """
                         ---- A Terminal Tools For DouyuTV
 
     @author Micheal Gardner (twocucao@gmail.com)
-                                    last_update 2016-06-09
+                                    last_update 2016-07-14 08:58
 """
 
 logger = logging.getLogger('danmu.fm')
