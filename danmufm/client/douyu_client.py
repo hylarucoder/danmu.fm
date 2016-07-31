@@ -52,7 +52,7 @@ class DouyuClient(object):
         if auth_server_ip == False or auth_server_port == True:
             exit()
         # 获取视频流信息
-        self.fetch_rtmp_info()
+        # self.fetch_rtmp_info()
         # 使用弹幕Manager不断获取弹幕到队列中,并打印出来
         self.fetch_danmu(auth_server_ip,auth_server_port)
         pass
@@ -101,8 +101,9 @@ class DouyuClient(object):
         url_json = api_url_prefix + md5url + "&auth=" + m2.hexdigest()
         res = requests.get(url_json)
         js_data = json.loads(res.text)
-        # print(js_data)
+        print("-->" + str(js_data))
         # 如果在线,则存在RTMP视频流,否则主播不在线
+
         if str(js_data["data"]["rtmp_live"]).strip() == "":
             logger.error("当前主播不在线,请切换别的房间试试")
             exit()

@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 打包的用的setup必须引入，
 """
 
-VERSION = '0.3.3'
+VERSION = '0.3.4'
 
 setup(name='danmu.fm',
       version=VERSION,
