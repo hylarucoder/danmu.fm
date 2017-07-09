@@ -72,17 +72,17 @@ class DouyuClient(object):
             room = room_status
             room["id"] = js["room_id"]
             room["name"] = js["room_name"]
-            room["gg_show"] = js["room_gg"]["show"]
+            room["gg_show"] = js["show_id"]
             room["owner_uid"] = js["owner_uid"]
             room["owner_name"] = js["owner_name"]
             room["room_url"] = js["room_url"]
-            room["near_show_time"] = js["near_show_time"]
-            room["tags"] = []
-            room_tags_json = js["all_tag_list"]
-            if js["room_tag_list"] != None:
-                room_tags_size = len(js["room_tag_list"])
-                for i in range(0, room_tags_size):
-                    room["tags"].append(room_tags_json[js["room_tag_list"][i]]["name"])
+            room["near_show_time"] = js["show_time"]
+            # room["tags"] = []
+            # room_tags_json = js["all_tag_list"]
+            # if js["room_tag_list"] != None:
+            #     room_tags_size = len(js["room_tag_list"])
+            #     for i in range(0, room_tags_size):
+            #         room["tags"].append(room_tags_json[js["room_tag_list"][i]]["name"])
 
             auth_servers = valid_json(unquote(auth_server_json_format["server_config"]))
             auth_server_ip = auth_servers[0]["ip"]
@@ -161,7 +161,7 @@ class DouyuClient(object):
         print("= 房间: " + room_status["name"] + "(" + room_status["id"] + ")")
         print("= 主播: " + room_status["owner_name"] + str(room_status["owner_uid"]))
         print("= 公告: " + re.sub("\n+", "\n", re.sub('<[^<]+?>', '', room_status["gg_show"])))
-        print("= 标签: " + str(room_status["tags"]))
+        # print("= 标签: " + str(room_status["tags"]))
         print("= 在线: " + room_status["live_stat"])
         print("= 粉丝: " + room_status["fans_count"])
         print("= 财产: " + room_status["weight"])
