@@ -18,6 +18,16 @@ from danmufm.misc.player import MPlayer
 
 logger = logging.getLogger("danmu.fm")
 
+session = requests.session()
+
+session.headers = {
+    "Accept": "text/html",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Language": "zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4",
+    "Connection": "keep-alive",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36",
+}
+
 
 def valid_json(my_json):
     """ 验证是否为 json 数据格式"""
@@ -45,7 +55,6 @@ class DouyuClient(object):
         self.url = url
         self.mplayer = MPlayer()
 
-
     def start(self):
         # 获取房间信息
         auth_server_ip, auth_server_port = self.fetch_room_info(self.url)
@@ -54,12 +63,12 @@ class DouyuClient(object):
         # 获取视频流信息
         # self.fetch_rtmp_info()
         # 使用弹幕Manager不断获取弹幕到队列中,并打印出来
-        self.fetch_danmu(auth_server_ip,auth_server_port)
+        self.fetch_danmu(auth_server_ip, auth_server_port)
         pass
 
     def fetch_room_info(self, url):
 
-        html = urlopen(url).read().decode()
+        html = session.get(url).text
         room_info_json = re.search('var\s\$ROOM\s=\s({.*});', html).group(1)
         # print(room_info_json)
         auth_server_json = re.search('\$ROOM\.args\s=\s({.*});', html).group(1)
@@ -99,7 +108,7 @@ class DouyuClient(object):
         md5url = "room/" + str(room_status["id"]) + "?aid=android&client_sys=android&time=" + str(cctime)
         m2 = hashlib.md5(bytes(md5url + "1231", "utf-8"))
         url_json = api_url_prefix + md5url + "&auth=" + m2.hexdigest()
-        res = requests.get(url_json)
+        res = session.get(url_json)
         js_data = json.loads(res.text)
         print("-->" + str(js_data))
         # 如果在线,则存在RTMP视频流,否则主播不在线
@@ -112,9 +121,9 @@ class DouyuClient(object):
         sd_rmtp_url = str(js_data["data"]["rtmp_url"]) + "/" + str(js_data["data"]["rtmp_live"])
         hd_rmtp_url = str(js_data["data"]["rtmp_url"]) + "/" + str(js_data["data"]["rtmp_live"])
         spd_rmtp_url = str(js_data["data"]["rtmp_url"]) + "/" + str(js_data["data"]["rtmp_live"])
-        sd_flv_addr = requests.get(sd_rmtp_url, allow_redirects=False).headers["Location"]
-        hd_flv_addr = requests.get(hd_rmtp_url, allow_redirects=False).headers["Location"]
-        spd_flv_addr = requests.get(spd_rmtp_url, allow_redirects=False).headers["Location"]
+        sd_flv_addr = session.get(sd_rmtp_url, allow_redirects=False).headers["Location"]
+        hd_flv_addr = session.get(hd_rmtp_url, allow_redirects=False).headers["Location"]
+        spd_flv_addr = session.get(spd_rmtp_url, allow_redirects=False).headers["Location"]
         if config["video_stored_path"] != os.getcwd():
             if config["video_quality"] <= 0:
                 logger.info("不播放视频")
@@ -128,15 +137,17 @@ class DouyuClient(object):
                 logger.info("正在尝试使用Mplayer播放超清视频" + spd_flv_addr)
                 self.mplayer.start(spd_flv_addr)
         else:
-            t = threading.Thread(target=self.wget_to_path,args=(config["video_stored_path"],spd_flv_addr,))
+            t = threading.Thread(target=self.wget_to_path, args=(config["video_stored_path"], spd_flv_addr,))
             t.setDaemon(True)
             t.start()
         pass
-    def wget_to_path(self,path,url):
+
+    def wget_to_path(self, path, url):
         cmd = ["/usr/local/bin/wget",
-                url,
+               url,
                "-O",
-                os.path.join(path,room_status["owner_name"] + "_" + room_status["name"].strip().replace(" ","_") + str(time.strftime("_%Y%m%d_%H%M%S") + str(".flv")))
+               os.path.join(path, room_status["owner_name"] + "_" + room_status["name"].strip().replace(" ", "_") + str(
+                   time.strftime("_%Y%m%d_%H%M%S") + str(".flv")))
                ]
         logger.debug(cmd)
         try:
@@ -145,10 +156,6 @@ class DouyuClient(object):
             print(e.output)
 
         pass
-
-
-
-
 
     def fetch_danmu(self, auth_server_ip, auth_server_port):
         client = DouyuDanmuManager(auth_server_ip, auth_server_port)
